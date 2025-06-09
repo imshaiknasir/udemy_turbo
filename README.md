@@ -142,6 +142,12 @@ This project includes GitHub Actions for automated releases:
 3. **GitHub Actions**: Automatically creates release packages and GitHub release
 4. **Download**: Users can download packages from the GitHub releases page
 
+#### Repository Setup
+
+For automated releases to work, ensure your GitHub repository has:
+- **Actions enabled**: Go to Settings → Actions → General → Allow all actions
+- **Workflow permissions**: Settings → Actions → General → Workflow permissions → "Read and write permissions"
+
 ## File Structure
 
 ```

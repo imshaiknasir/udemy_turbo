@@ -112,8 +112,26 @@ const packageFirefox = () => {
   return createPackage('firefox');
 };
 
+const syncVersions = () => {
+  // Ensure both manifests have the same version
+  const chromeManifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+  const firefoxManifest = JSON.parse(fs.readFileSync('manifest-firefox.json', 'utf8'));
+  
+  if (chromeManifest.version !== firefoxManifest.version) {
+    console.log(`⚠️  Version mismatch detected: Chrome=${chromeManifest.version}, Firefox=${firefoxManifest.version}`);
+    console.log(`   Using Chrome version: ${chromeManifest.version}`);
+    
+    firefoxManifest.version = chromeManifest.version;
+    fs.writeFileSync('manifest-firefox.json', JSON.stringify(firefoxManifest, null, 2));
+    console.log('✓ Firefox manifest version synchronized');
+  }
+};
+
 const packageBoth = () => {
   console.log('Creating packages for both browsers...');
+  
+  // Sync versions first
+  syncVersions();
   
   const chromePackage = packageChrome();
   const firefoxPackage = packageFirefox();
