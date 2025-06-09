@@ -1,0 +1,36 @@
+{
+  "manifest_version": 2,
+  "name": "Udemy Speed Controller",
+  "version": "1.0",
+  "description": "Overrides Udemy's default video speed limit. Allows playback up to 8x.",
+  "homepage_url": "https://github.com/example/udemy-speed-controller",
+
+  "permissions": [
+    "storage",
+    "*://*.udemy.com/*"
+  ],
+
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "24": "icons/icon24.png",
+      "32": "icons/icon32.png"
+    },
+    "default_title": "Udemy Speed Controller",
+    "default_popup": "popup.html"
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.udemy.com/course/*"],
+      "js": ["browser-polyfill.min.js", "content_script.js"]
+    }
+  ]
+} 
