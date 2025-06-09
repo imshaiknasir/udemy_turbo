@@ -25,6 +25,9 @@ yarn-error.log*
 *.pem
 *.zip
 
+# Build output
+dist/
+
 # Temporary files
 *.tmp
 *.temp

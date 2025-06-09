@@ -110,7 +110,37 @@ node build.js firefox
 
 # Restore Chrome configuration
 node build.js restore
+
+# Create release packages
+node build.js package              # Create packages for both browsers
+node build.js package-chrome       # Create Chrome package only
+node build.js package-firefox      # Create Firefox package only
 ```
+
+## Release Management
+
+```bash
+# Check current version
+node release.js version
+
+# Update version number
+node release.js version 1.1
+
+# Create complete release (updates version, commits, tags, and pushes)
+node release.js release 1.1
+
+# Create release with current version
+node release.js tag
+```
+
+### Automated Releases
+
+This project includes GitHub Actions for automated releases:
+
+1. **Update version**: `node release.js release 1.1`
+2. **Push to GitHub**: The script automatically commits and pushes the tag
+3. **GitHub Actions**: Automatically creates release packages and GitHub release
+4. **Download**: Users can download packages from the GitHub releases page
 
 ## File Structure
 

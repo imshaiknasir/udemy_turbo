@@ -1,0 +1,85 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0, v1.1, etc.
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Create release packages
+      run: |
+        node build.js package
+        
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ## Udemy Speed Controller ${{ steps.get_version.outputs.VERSION }}
+          
+          ### Installation
+          
+          **Chrome:**
+          1. Download `udemy-speed-controller-chrome-${{ steps.get_version.outputs.VERSION }}.zip`
+          2. Extract the zip file
+          3. Go to `chrome://extensions/`
+          4. Enable "Developer mode"
+          5. Click "Load unpacked" and select the extracted folder
+          
+          **Firefox:**
+          1. Download `udemy-speed-controller-firefox-${{ steps.get_version.outputs.VERSION }}.zip`
+          2. Extract the zip file
+          3. Go to `about:debugging`
+          4. Click "This Firefox" → "Load Temporary Add-on"
+          5. Select the `manifest.json` file from the extracted folder
+          
+          ### Features
+          - Control video playback speed from 0.5x to 8x
+          - Persistent speed settings across page navigation
+          - Works with Udemy's single-page application
+          - Cross-browser compatibility (Chrome & Firefox)
+          
+          ### What's Changed
+          - See commit history for detailed changes
+        draft: false
+        prerelease: false
+        
+    - name: Upload Chrome Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/udemy-speed-controller-chrome-v1.0.zip
+        asset_name: udemy-speed-controller-chrome-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Firefox Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/udemy-speed-controller-firefox-v1.0.zip
+        asset_name: udemy-speed-controller-firefox-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_content_type: application/zip 

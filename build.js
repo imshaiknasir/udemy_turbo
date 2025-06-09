@@ -2,6 +2,44 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+
+// Files to include in the package
+const PACKAGE_FILES = [
+  'manifest.json',
+  'content_script.js',
+  'popup.html',
+  'popup.js',
+  'browser-polyfill.min.js',
+  'icons/',
+  'LICENSE',
+  'README.md'
+];
+
+const createPackage = (browser) => {
+  const version = JSON.parse(fs.readFileSync('manifest.json', 'utf8')).version;
+  const packageName = `udemy-speed-controller-${browser}-v${version}.zip`;
+  
+  console.log(`Creating ${browser} package: ${packageName}`);
+  
+  // Create dist directory if it doesn't exist
+  if (!fs.existsSync('dist')) {
+    fs.mkdirSync('dist');
+  }
+  
+  try {
+    // Use zip command if available, otherwise provide instructions
+    const filesToZip = PACKAGE_FILES.join(' ');
+    execSync(`zip -r dist/${packageName} ${filesToZip}`, { stdio: 'inherit' });
+    console.log(`✓ Package created: dist/${packageName}`);
+    return `dist/${packageName}`;
+  } catch (error) {
+    console.log('⚠️  Zip command not available. Please manually create a zip file with these files:');
+    PACKAGE_FILES.forEach(file => console.log(`   - ${file}`));
+    console.log(`   Save as: dist/${packageName}`);
+    return null;
+  }
+};
 
 const buildForChrome = () => {
   console.log('Building for Chrome (Manifest V3)...');
@@ -62,6 +100,34 @@ const restoreChrome = () => {
   console.log('✓ Chrome manifest restored');
 };
 
+const packageChrome = () => {
+  console.log('Packaging for Chrome...');
+  restoreChrome();
+  return createPackage('chrome');
+};
+
+const packageFirefox = () => {
+  console.log('Packaging for Firefox...');
+  buildForFirefox();
+  return createPackage('firefox');
+};
+
+const packageBoth = () => {
+  console.log('Creating packages for both browsers...');
+  
+  const chromePackage = packageChrome();
+  const firefoxPackage = packageFirefox();
+  
+  console.log('\n📦 Release packages created:');
+  if (chromePackage) console.log(`   Chrome: ${chromePackage}`);
+  if (firefoxPackage) console.log(`   Firefox: ${firefoxPackage}`);
+  
+  console.log('\n🚀 Next steps:');
+  console.log('   1. Test both packages in their respective browsers');
+  console.log('   2. Create a GitHub release with these packages');
+  console.log('   3. Upload to Chrome Web Store / Firefox Add-ons');
+};
+
 const command = process.argv[2];
 
 switch (command) {
@@ -74,11 +140,24 @@ switch (command) {
   case 'restore':
     restoreChrome();
     break;
+  case 'package-chrome':
+    packageChrome();
+    break;
+  case 'package-firefox':
+    packageFirefox();
+    break;
+  case 'package':
+  case 'package-all':
+    packageBoth();
+    break;
   default:
     console.log('Usage:');
-    console.log('  node build.js chrome   - Prepare for Chrome (Manifest V3)');
-    console.log('  node build.js firefox  - Prepare for Firefox (Manifest V2)');
-    console.log('  node build.js restore  - Restore Chrome manifest');
+    console.log('  node build.js chrome          - Prepare for Chrome (Manifest V3)');
+    console.log('  node build.js firefox         - Prepare for Firefox (Manifest V2)');
+    console.log('  node build.js restore         - Restore Chrome manifest');
+    console.log('  node build.js package-chrome  - Create Chrome package');
+    console.log('  node build.js package-firefox - Create Firefox package');
+    console.log('  node build.js package         - Create packages for both browsers');
     console.log('');
     console.log('Current manifest version:', 
       JSON.parse(fs.readFileSync('manifest.json', 'utf8')).manifest_version);
